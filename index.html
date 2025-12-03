@@ -4570,22 +4570,24 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$Input$build = F2(
+var $author$project$Input$build_ = F2(
 	function (value, _v0) {
 		var input = _v0.a;
 		var interaction = A2(
 			$elm$core$Maybe$withDefault,
 			$elm$html$Html$Attributes$disabled(true),
 			A2($elm$core$Maybe$map, $elm$html$Html$Events$onInput, input.onChange));
-		var extraAttrs = function () {
-			var _v1 = input.validator(value);
-			if (_v1.$ === 'Err') {
-				var attr = _v1.a;
-				return _Utils_ap(input.extraAttributes, attr);
-			} else {
-				return input.extraAttributes;
-			}
-		}();
+		var extraAttrs = _Utils_ap(
+			input.extraAttributes,
+			function () {
+				var _v1 = input.validator(value);
+				if (_v1.$ === 'Err') {
+					var attr = _v1.a;
+					return attr;
+				} else {
+					return _List_Nil;
+				}
+			}());
 		return A2(
 			$elm$html$Html$input,
 			A2(
@@ -4600,6 +4602,9 @@ var $author$project$Input$build = F2(
 						A2($elm$core$List$cons, interaction, extraAttrs)))),
 			_List_Nil);
 	});
+var $elm$virtual_dom$VirtualDom$lazy2 = _VirtualDom_lazy2;
+var $elm$html$Html$Lazy$lazy2 = $elm$virtual_dom$VirtualDom$lazy2;
+var $author$project$Input$build = $elm$html$Html$Lazy$lazy2($author$project$Input$build_);
 var $elm$core$Basics$identity = function (x) {
 	return x;
 };

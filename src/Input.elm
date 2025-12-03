@@ -1,4 +1,4 @@
-module Input exposing (build, new, withAttributes, withDisabled, withOnChange, withRequired, withTransformer, withType, withValidator)
+module Input exposing (Dumb, Input, WithInteraction, build, new, withAttributes, withDisabled, withOnChange, withRequired, withTransformer, withType, withValidator)
 
 import Html exposing (Html)
 import Html.Attributes as Attr
@@ -44,7 +44,7 @@ withTransformer transformer (Input input) =
     Input { input | transformer = transformer }
 
 
-withValidator : (String -> Result (List (Html.Attribute msg)) ()) -> Input WithInteraction msg -> Input WithInteraction msg
+withValidator : (String -> Result (List (Html.Attribute msg)) ()) -> Input any msg -> Input any msg
 withValidator validator (Input input) =
     Input { input | validator = validator }
 
