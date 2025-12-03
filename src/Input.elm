@@ -1,6 +1,6 @@
-module Input exposing (Dumb, Input, WithInteraction, build, new, withAttributes, withDisabled, withOnChange, withRequired, withTransformer, withType, withValidator)
+module Input exposing (Dumb, Input, WithInteraction, build, new, withAttributes, withDisabled, withOnChange, withPlaceholder, withRequired, withTransformer, withType, withValidator)
 
-import Html exposing (Html)
+import Html exposing (Attribute, Html)
 import Html.Attributes as Attr
 import Html.Events as Events
 import Html.Lazy
@@ -10,6 +10,7 @@ type alias Props msg =
     { label : String
     , required : Bool
     , type_ : String
+    , placeholder : Maybe String
     , transformer : String -> String
     , validator : String -> Result (List (Html.Attribute msg)) ()
     , extraAttributes : List (Html.Attribute msg)
@@ -32,6 +33,11 @@ type WithInteraction
 withRequired : Bool -> Input any msg -> Input any msg
 withRequired required (Input input) =
     Input { input | required = required }
+
+
+withPlaceholder : String -> Input any msg -> Input any msg
+withPlaceholder placeholder (Input input) =
+    Input { input | placeholder = Just placeholder }
 
 
 withType : String -> Input any msg -> Input any msg
@@ -70,6 +76,7 @@ new label =
         { label = label
         , required = False
         , type_ = "text"
+        , placeholder = Nothing
         , validator = always (Result.Ok ())
         , transformer = identity
         , extraAttributes = []
@@ -85,16 +92,24 @@ build =
 build_ : String -> Input WithInteraction msg -> Html msg
 build_ value (Input input) =
     let
+        placeholderAttr : Html.Attribute msg
+        placeholderAttr =
+            input.placeholder
+                |> Maybe.map Attr.placeholder
+                |> Maybe.withDefault (Attr.class "")
+
+        validatorAttrs : List (Html.Attribute msg)
+        validatorAttrs =
+            case input.validator value of
+                Result.Err attr ->
+                    attr
+
+                Result.Ok () ->
+                    []
+
         extraAttrs : List (Html.Attribute msg)
         extraAttrs =
-            input.extraAttributes
-                ++ (case input.validator value of
-                        Result.Err attr ->
-                            attr
-
-                        Result.Ok () ->
-                            []
-                   )
+            placeholderAttr :: (input.extraAttributes ++ validatorAttrs)
 
         interaction : Html.Attribute msg
         interaction =
@@ -106,6 +121,7 @@ build_ value (Input input) =
         (Attr.type_ input.type_
             :: Attr.value value
             :: Attr.required input.required
+            :: Attr.attribute "aria-labelledby" input.label
             :: interaction
             :: extraAttrs
         )
