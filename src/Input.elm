@@ -3,6 +3,7 @@ module Input exposing (build, new, withAttributes, withDisabled, withOnChange, w
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Html.Events as Events
+import Html.Lazy
 
 
 type alias Props msg =
@@ -16,16 +17,16 @@ type alias Props msg =
     }
 
 
-type Input state msg
+type Input interaction msg
     = Input (Props msg)
 
 
 type Dumb
-    = Dumb
+    = Dumb Never
 
 
 type WithInteraction
-    = WithInteraction
+    = WithInteraction Never
 
 
 withRequired : Bool -> Input any msg -> Input any msg
@@ -77,16 +78,25 @@ new label =
 
 
 build : String -> Input WithInteraction msg -> Html msg
-build value (Input input) =
+build =
+    Html.Lazy.lazy2 build_
+
+
+build_ : String -> Input WithInteraction msg -> Html msg
+build_ value (Input input) =
     let
+        extraAttrs : List (Html.Attribute msg)
         extraAttrs =
-            case input.validator value of
-                Result.Err attr ->
-                    input.extraAttributes ++ attr
+            input.extraAttributes
+                ++ (case input.validator value of
+                        Result.Err attr ->
+                            attr
 
-                Result.Ok () ->
-                    input.extraAttributes
+                        Result.Ok () ->
+                            []
+                   )
 
+        interaction : Html.Attribute msg
         interaction =
             input.onChange
                 |> Maybe.map Events.onInput
